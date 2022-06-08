@@ -1,13 +1,13 @@
-package com.tileman;
+package com.grouptileman;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 
-public class TilemanModePluginTest
+public class GroupTilemanAddonTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(TilemanModePlugin.class);
+		ExternalPluginManager.loadBuiltin(GroupTilemanAddon.class);
 		RuneLite.main(args);
 	}
 }

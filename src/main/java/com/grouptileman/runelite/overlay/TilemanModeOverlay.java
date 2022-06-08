@@ -1,3 +1,5 @@
+package com.grouptileman.runelite.overlay;
+
 /*
  * Copyright (c) 2018, TheLonelyDev <https://github.com/TheLonelyDev>
  * Copyright (c) 2018, Adam <Adam@sigterm.info>
@@ -24,8 +26,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.tileman;
 
+
+import com.grouptileman.GroupTilemanAddon;
+import com.grouptileman.runelite.config.TilemanModeConfig;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
 import net.runelite.api.coords.LocalPoint;
@@ -36,76 +41,61 @@ import javax.inject.Inject;
 import java.awt.*;
 import java.util.Collection;
 
-public class TilemanModeOverlay extends Overlay
-{
-	private static final int MAX_DRAW_DISTANCE = 32;
+@Slf4j
+public class TilemanModeOverlay extends Overlay {
+    private static final int MAX_DRAW_DISTANCE = 32;
 
-	private final Client client;
-	private final TilemanModePlugin plugin;
+    private final Client client;
+    private final GroupTilemanAddon plugin;
 
-	@Inject
-	private TilemanModeConfig config;
+    @Inject
+    private TilemanModeConfig config;
 
-	@Inject
-	private TilemanModeOverlay(Client client, TilemanModeConfig config, TilemanModePlugin plugin)
-	{
-		this.client = client;
-		this.plugin = plugin;
-		this.config = config;
-		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
-		setLayer(OverlayLayer.ABOVE_SCENE);
-	}
+    @Inject
+    private TilemanModeOverlay(Client client, TilemanModeConfig config, GroupTilemanAddon plugin) {
+        this.client = client;
+        this.plugin = plugin;
+        this.config = config;
+        setPosition(OverlayPosition.DYNAMIC);
+        setPriority(OverlayPriority.LOW);
+        setLayer(OverlayLayer.ABOVE_SCENE);
+    }
 
-	@Override
-	public Dimension render(Graphics2D graphics)
-	{
-		final Collection<WorldPoint> points = plugin.getPoints();
-		for (final WorldPoint point : points)
-		{
-			if (point.getPlane() != client.getPlane())
-			{
-				continue;
-			}
+    @Override
+    public Dimension render(Graphics2D graphics) {
+        final Collection<WorldPoint> points = plugin.getPoints();
+        for (final WorldPoint point : points) {
+            if (point.getPlane() != client.getPlane()) {
+                continue;
+            }
 
-			drawTile(graphics, point);
-		}
+            drawTile(graphics, point);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	private void drawTile(Graphics2D graphics, WorldPoint point)
-	{
-		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
+    private void drawTile(Graphics2D graphics, WorldPoint point) {
+        WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
 
-		if (point.distanceTo(playerLocation) >= MAX_DRAW_DISTANCE)
-		{
-			return;
-		}
+        if (point.distanceTo(playerLocation) >= MAX_DRAW_DISTANCE) {
+            return;
+        }
 
-		LocalPoint lp = LocalPoint.fromWorld(client, point);
-		if (lp == null)
-		{
-			return;
-		}
+        LocalPoint lp = LocalPoint.fromWorld(client, point);
+        if (lp == null) {
+            return;
+        }
 
-		Polygon poly = Perspective.getCanvasTilePoly(client, lp);
-		if (poly == null)
-		{
-			return;
-		}
+        Polygon poly = Perspective.getCanvasTilePoly(client, lp);
+        if (poly == null) {
+            return;
+        }
 
-		OverlayUtil.renderPolygon(graphics, poly, getTileColor());
-	}
+        OverlayUtil.renderPolygon(graphics, poly, getTileColor());
+    }
 
-	private Color getTileColor() {
-		if(config.enableTileWarnings()) {
-			if (plugin.getRemainingTiles() <= 0) {
-				return Color.RED;
-			} else if (plugin.getRemainingTiles() <= config.warningLimit()) {
-				return new Color(255, 153, 0);
-			}
-		}
-		return config.markerColor();
-	}
+    private Color getTileColor() {
+        return config.markerColor();
+    }
 }
